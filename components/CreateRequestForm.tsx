@@ -86,7 +86,7 @@ export function CreateRequestForm() {
     formData.categoryId;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
       {/* Business Type */}
       <div>
         <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-2">
@@ -127,13 +127,13 @@ export function CreateRequestForm() {
           placeholder="Add any specific requirements or context..."
           value={formData.context}
           onChange={(e) => setFormData({ ...formData, context: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
         />
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
           <p className="text-red-800 text-sm">{error}</p>
         </div>
       )}
@@ -142,7 +142,7 @@ export function CreateRequestForm() {
       <button
         type="submit"
         disabled={!isFormValid || creating}
-        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+        className="w-full bg-blue-600 text-white px-6 py-3 sm:py-3.5 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium text-sm sm:text-base min-h-[44px]"
       >
         {creating ? 'Creating...' : 'Create Request'}
       </button>
