@@ -12,6 +12,9 @@ import { useCreateRequest } from '@/lib/hooks/useCreateRequest';
 import { useCreateArea } from '@/lib/hooks/useCreateArea';
 import { LocationAutocomplete } from './LocationAutocomplete';
 import { CategorySearch } from './CategorySearch';
+import { Alert, AlertDescription } from './ui/alert';
+import { Textarea } from './ui/textarea';
+import { Button } from './ui/button';
 
 export function CreateRequestForm() {
   const router = useRouter();
@@ -28,6 +31,8 @@ export function CreateRequestForm() {
     selectedCategoryOptionId: '', // The actual selected option ID (could be category or subcategory)
     context: '',
   });
+
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleLocationSelect = (areaId: string, areaName: string) => {
     setFormData({ ...formData, locationId: areaId, location: areaName });
@@ -48,6 +53,7 @@ export function CreateRequestForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
 
     try {
       // Get or create area ID
@@ -57,7 +63,7 @@ export function CreateRequestForm() {
       }
 
       if (!areaId) {
-        alert('Please select a location');
+        setValidationError('Please select a location');
         return;
       }
 
@@ -70,14 +76,11 @@ export function CreateRequestForm() {
         area_id: areaId,
       });
 
-      // Show success message
-      alert('Request created successfully! You can now share the link.');
-
-      // Redirect to request detail page
-      router.push(`/request/${request.share_token}`);
+      // Redirect to request detail page with success indicator
+      router.push(`/request/${request.share_token}?new=1`);
     } catch (err: any) {
       console.error('Error creating request:', err);
-      alert(err.message || 'Failed to create request. Please try again.');
+      setValidationError(err.message || 'Failed to create request. Please try again.');
     }
   };
 
@@ -121,31 +124,32 @@ export function CreateRequestForm() {
         <label htmlFor="context" className="block text-sm font-medium text-gray-700 mb-2">
           Additional details (optional)
         </label>
-        <textarea
+        <Textarea
           id="context"
           rows={4}
           placeholder="Add any specific requirements or context..."
           value={formData.context}
           onChange={(e) => setFormData({ ...formData, context: e.target.value })}
-          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
+          className="resize-none"
         />
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
-          <p className="text-red-800 text-sm">{error}</p>
-        </div>
+      {/* Error Messages */}
+      {(error || validationError) && (
+        <Alert variant="destructive">
+          <AlertDescription>{error || validationError}</AlertDescription>
+        </Alert>
       )}
 
       {/* Submit Button */}
-      <button
+      <Button
         type="submit"
         disabled={!isFormValid || creating}
-        className="w-full bg-blue-600 text-white px-6 py-3 sm:py-3.5 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium text-sm sm:text-base min-h-[44px]"
+        size="lg"
+        className="w-full"
       >
         {creating ? 'Creating...' : 'Create Request'}
-      </button>
+      </Button>
     </form>
   );
 }

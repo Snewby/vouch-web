@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import type { WebRequestFeed } from '@/types/database';
 import { formatRelativeDate } from '@/lib/utils';
+import { Badge } from './ui/badge';
 
 interface RequestCardProps {
   request: WebRequestFeed;
@@ -17,22 +18,22 @@ export function RequestCard({ request }: RequestCardProps) {
         {/* Category and Location Tags */}
         <div className="flex flex-wrap gap-2 mb-3">
           {request.business_type_name && (
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs sm:text-sm px-2.5 sm:px-3 py-1 rounded-full">
+            <Badge variant="default">
               {request.business_type_name}
-            </span>
+            </Badge>
           )}
           {request.subcategory_name && (
-            <span className="inline-block bg-blue-50 text-blue-700 text-xs sm:text-sm px-2.5 sm:px-3 py-1 rounded-full">
+            <Badge variant="secondary">
               {request.subcategory_name}
-            </span>
+            </Badge>
           )}
           {request.location_name && (
-            <span className="inline-block bg-gray-100 text-gray-800 text-xs sm:text-sm px-2.5 sm:px-3 py-1 rounded-full">
+            <Badge variant="outline">
               📍 {request.location_name}
               {request.location_user_generated && (
                 <span className="ml-1 text-xs opacity-60">(new)</span>
               )}
-            </span>
+            </Badge>
           )}
         </div>
 

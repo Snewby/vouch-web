@@ -9,6 +9,11 @@ import { useCreateResponse } from '@/lib/hooks/useCreateResponse';
 import { useLocationHierarchy } from '@/lib/hooks/useLocationHierarchy';
 import { useCreateArea } from '@/lib/hooks/useCreateArea';
 import { LocationAutocomplete } from './LocationAutocomplete';
+import { Alert, AlertDescription } from './ui/alert';
+import { Textarea } from './ui/textarea';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { CheckCircle2 } from 'lucide-react';
 
 interface ResponseFormProps {
   requestId: string;
@@ -31,12 +36,15 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
     notes: '',
   });
 
+  const [success, setSuccess] = useState(false);
+
   const handleLocationSelect = (areaId: string, areaName: string) => {
     setFormData({ ...formData, locationId: areaId, location: areaName });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuccess(false);
 
     try {
       // Get or create area ID if location is provided
@@ -71,13 +79,15 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
       });
 
       // Show success
-      alert('Recommendation submitted successfully!');
+      setSuccess(true);
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000);
 
       // Trigger refresh
       onSuccess?.();
     } catch (err: any) {
       console.error('Error creating response:', err);
-      alert(err.message || 'Failed to submit recommendation. Please try again.');
     }
   };
 
@@ -85,18 +95,27 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Success Message */}
+      {success && (
+        <Alert>
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>
+            Recommendation submitted successfully! Thank you for sharing.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Your Name (optional) */}
       <div>
         <label htmlFor="responderName" className="block text-sm font-medium text-gray-700 mb-1">
           Your Name (optional)
         </label>
-        <input
+        <Input
           id="responderName"
           type="text"
           placeholder="e.g., John Doe"
           value={formData.responderName}
           onChange={(e) => setFormData({ ...formData, responderName: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 
@@ -105,14 +124,13 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
         <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
           Business Name *
         </label>
-        <input
+        <Input
           id="businessName"
           type="text"
           required
           placeholder="e.g., Joe's Plumbing"
           value={formData.businessName}
           onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 
@@ -139,13 +157,12 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email (optional)
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             placeholder="contact@example.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -154,13 +171,12 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
           <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-1">
             Instagram (optional)
           </label>
-          <input
+          <Input
             id="instagram"
             type="text"
             placeholder="@handle"
             value={formData.instagram}
             onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -169,13 +185,12 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
           <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
             Website (optional)
           </label>
-          <input
+          <Input
             id="website"
             type="url"
             placeholder="example.com"
             value={formData.website}
             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
@@ -185,31 +200,31 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
         <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
           Why do you recommend them? (optional)
         </label>
-        <textarea
+        <Textarea
           id="notes"
           rows={3}
           placeholder="Share your experience..."
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="resize-none"
         />
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <p className="text-red-800 text-sm">{error}</p>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Submit Button */}
-      <button
+      <Button
         type="submit"
         disabled={!isFormValid || loading}
-        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+        className="w-full"
       >
         {loading ? 'Submitting...' : 'Submit Recommendation'}
-      </button>
+      </Button>
     </form>
   );
 }

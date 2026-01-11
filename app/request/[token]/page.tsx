@@ -9,29 +9,36 @@ import Link from 'next/link';
 import { useRequestByToken } from '@/lib/hooks/useRequestByToken';
 import { ResponseForm } from '@/components/ResponseForm';
 import { ResponseList } from '@/components/ResponseList';
-import { formatRelativeDate, getRequestShareUrl, copyToClipboard } from '@/lib/utils';
+import { ShareRequestButtons } from '@/components/ShareRequestButtons';
+import { formatRelativeDate } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function RequestDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams?: Promise<{ new?: string }>;
 }) {
   // In Next.js 15+, params is a Promise
   const [token, setToken] = React.useState<string>('');
+  const [isNewRequest, setIsNewRequest] = React.useState(false);
 
   React.useEffect(() => {
     params.then((p) => setToken(p.token));
-  }, [params]);
+    searchParams?.then((sp) => {
+      if (sp.new === '1') {
+        setIsNewRequest(true);
+        // Clear the URL parameter after showing the message
+        window.history.replaceState({}, '', `/request/${token}`);
+      }
+    });
+  }, [params, searchParams, token]);
 
   const { request, responses, loading, error, refetch } = useRequestByToken(token);
-
-  const handleCopyLink = async () => {
-    const url = getRequestShareUrl(token);
-    const success = await copyToClipboard(url);
-    if (success) {
-      alert('Link copied to clipboard!');
-    }
-  };
 
   // Show loading if we don't have the token yet
   if (!token || loading) {
@@ -73,35 +80,37 @@ export default function RequestDetailPage({
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              ← Back to Requests
-            </Link>
-            <button
-              onClick={handleCopyLink}
-              className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              📋 Copy Link
-            </button>
-          </div>
+          <Link
+            href="/"
+            className="text-gray-600 hover:text-gray-900 transition-colors inline-block"
+          >
+            ← Back to Requests
+          </Link>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Success Message for New Requests */}
+        {isNewRequest && (
+          <Alert className="mb-6">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>
+              Request created successfully! Share the link below to get recommendations.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Request Header */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
-          <div className="mb-4">
-            <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Badge variant="default">
               {request.business_type_name || 'Recommendation'}
-            </span>
+            </Badge>
             {request.location_name && (
-              <span className="inline-block ml-2 bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full">
+              <Badge variant="outline">
                 📍 {request.location_name}
-              </span>
+              </Badge>
             )}
           </div>
 
@@ -123,6 +132,24 @@ export default function RequestDetailPage({
             </span>
           </div>
         </div>
+
+        {/* Share Request Section */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Share This Request
+          </h2>
+          <p className="text-gray-600 text-sm mb-4">
+            Share this link to get recommendations from your network
+          </p>
+          <ShareRequestButtons
+            requestToken={token}
+            requestTitle={request.title}
+            businessType={request.business_type_name || undefined}
+            location={request.location_name || undefined}
+          />
+        </div>
+
+        <Separator className="mb-8" />
 
         {/* Response Form */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
