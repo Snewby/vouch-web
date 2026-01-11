@@ -8,14 +8,78 @@ import { CreateRequestInput } from '@/types/request';
 import { RecRequest } from '@/types/database';
 
 /**
+ * Generate title from category/subcategory and area
+ */
+async function generateTitle(
+  categoryId: string,
+  subcategoryId: string | null,
+  areaId: string
+): Promise<string> {
+  try {
+    // Get area name
+    const { data: areaItem, error: areaError } = await supabase
+      .from('list_items')
+      .select('name')
+      .eq('id', areaId)
+      .single();
+
+    if (areaError) throw areaError;
+    const areaName = areaItem?.name || 'Unknown Location';
+
+    // Get subcategory or category name
+    let businessTypeName = '';
+
+    if (subcategoryId) {
+      const { data: subcatItem, error: subcatError } = await supabase
+        .from('list_items')
+        .select('name')
+        .eq('id', subcategoryId)
+        .single();
+
+      if (!subcatError && subcatItem) {
+        businessTypeName = subcatItem.name;
+      }
+    }
+
+    if (!businessTypeName) {
+      const { data: catItem, error: catError } = await supabase
+        .from('list_items')
+        .select('name')
+        .eq('id', categoryId)
+        .single();
+
+      if (!catError && catItem) {
+        businessTypeName = catItem.name;
+      }
+    }
+
+    // Generate title: "Restaurant in Shoreditch" or "Food & Drink in Hackney"
+    return `${businessTypeName} in ${areaName}`;
+  } catch (error) {
+    console.error('Error generating title:', error);
+    return 'Recommendation Request';
+  }
+}
+
+/**
  * Create a new request
  */
 async function createRequest(input: CreateRequestInput): Promise<RecRequest> {
   try {
+    // Auto-generate title if not provided
+    let title = input.title;
+    if (!title || title.trim() === '') {
+      title = await generateTitle(
+        input.category_id,
+        input.subcategory_id || null,
+        input.area_id
+      );
+    }
+
     const { data, error } = await supabase
       .from('rec_requests')
       .insert({
-        title: input.title,
+        title,
         context: input.context || null,
         category_id: input.category_id,
         subcategory_id: input.subcategory_id || null,

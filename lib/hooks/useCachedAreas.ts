@@ -56,11 +56,12 @@ async function fetchHierarchyItems(
 
 /**
  * Cached areas hook - 6 hour cache for geographic data
+ * Fetches all areas regardless of parent_id
  */
 export function useCachedAreas() {
   const query = useQuery({
     queryKey: ['areas'],
-    queryFn: () => fetchHierarchyItems('area', null),
+    queryFn: () => fetchHierarchyItems('area'),
     staleTime: 6 * 60 * 60 * 1000, // 6 hours
     gcTime: 6 * 60 * 60 * 1000, // 6 hours
   });

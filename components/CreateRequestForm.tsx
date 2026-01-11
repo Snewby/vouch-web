@@ -4,34 +4,46 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCachedCategories, useCachedSubcategories } from '@/lib/hooks/useCachedCategories';
+import { useAllCategoriesFlat } from '@/lib/hooks/useAllCategoriesFlat';
 import { useCachedAreas } from '@/lib/hooks/useCachedAreas';
 import { useCreateRequest } from '@/lib/hooks/useCreateRequest';
 import { useCreateArea } from '@/lib/hooks/useCreateArea';
 import { LocationAutocomplete } from './LocationAutocomplete';
+import { CategorySearch } from './CategorySearch';
 
 export function CreateRequestForm() {
   const router = useRouter();
-  const { categories, loading: categoriesLoading } = useCachedCategories();
+  const { categories, loading: categoriesLoading } = useAllCategoriesFlat();
   const { areas, loading: areasLoading } = useCachedAreas();
   const { createRequestAsync, loading: creating, error } = useCreateRequest();
   const { getOrCreateAreaAsync } = useCreateArea();
 
   const [formData, setFormData] = useState({
-    title: '',
     location: '',
     locationId: '',
-    businessType: '',
-    subcategory: '',
+    categoryId: '',
+    subcategoryId: '',
+    selectedCategoryOptionId: '', // The actual selected option ID (could be category or subcategory)
     context: '',
   });
 
-  const { subcategories } = useCachedSubcategories(formData.businessType);
-
   const handleLocationSelect = (areaId: string, areaName: string) => {
     setFormData({ ...formData, locationId: areaId, location: areaName });
+  };
+
+  const handleCategorySelect = (
+    optionId: string,
+    categoryId: string,
+    subcategoryId: string | null
+  ) => {
+    setFormData({
+      ...formData,
+      selectedCategoryOptionId: optionId,
+      categoryId,
+      subcategoryId: subcategoryId || '',
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,10 +63,10 @@ export function CreateRequestForm() {
 
       // Create request
       const request = await createRequestAsync({
-        title: formData.title,
+        title: '', // Will be auto-generated on backend
         context: formData.context || null,
-        category_id: formData.businessType,
-        subcategory_id: formData.subcategory || null,
+        category_id: formData.categoryId,
+        subcategory_id: formData.subcategoryId || null,
         area_id: areaId,
       });
 
@@ -70,25 +82,22 @@ export function CreateRequestForm() {
   };
 
   const isFormValid =
-    formData.title.trim() &&
     (formData.locationId || formData.location.trim()) &&
-    formData.businessType;
+    formData.categoryId;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Title */}
+      {/* Business Type */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-2">
           What are you looking for? *
         </label>
-        <input
-          id="title"
-          type="text"
+        <CategorySearch
+          categories={categories}
+          loading={categoriesLoading}
+          value={formData.selectedCategoryOptionId}
+          onSelect={handleCategorySelect}
           required
-          placeholder="e.g., Plumber in Hackney, Italian restaurant in Shoreditch"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 
@@ -105,52 +114,6 @@ export function CreateRequestForm() {
           onChange={(value) => setFormData({ ...formData, location: value, locationId: '' })}
         />
       </div>
-
-      {/* Business Type */}
-      <div>
-        <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-2">
-          Business Type *
-        </label>
-        <select
-          id="businessType"
-          required
-          value={formData.businessType}
-          onChange={(e) =>
-            setFormData({ ...formData, businessType: e.target.value, subcategory: '' })
-          }
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          disabled={categoriesLoading}
-        >
-          <option value="">Select a type...</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Subcategory (optional) */}
-      {formData.businessType && subcategories.length > 0 && (
-        <div>
-          <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
-            Subcategory (optional)
-          </label>
-          <select
-            id="subcategory"
-            value={formData.subcategory}
-            onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          >
-            <option value="">None</option>
-            {subcategories.map((subcategory) => (
-              <option key={subcategory.id} value={subcategory.id}>
-                {subcategory.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
 
       {/* Context (optional) */}
       <div>

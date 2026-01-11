@@ -16,7 +16,8 @@ export default function RequestDetailPage({
 }: {
   params: Promise<{ token: string }>;
 }) {
-  const { token } = use(params);
+  const resolvedParams = use(params);
+  const { token } = resolvedParams;
   const { request, responses, loading, error, refetch } = useRequestByToken(token);
 
   const handleCopyLink = async () => {
