@@ -4,6 +4,7 @@
 
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { useRequestByToken } from '@/lib/hooks/useRequestByToken';
 import { ResponseForm } from '@/components/ResponseForm';
@@ -13,9 +14,15 @@ import { formatRelativeDate, getRequestShareUrl, copyToClipboard } from '@/lib/u
 export default function RequestDetailPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
-  const { token } = params;
+  // In Next.js 15+, params is a Promise
+  const [token, setToken] = React.useState<string>('');
+
+  React.useEffect(() => {
+    params.then((p) => setToken(p.token));
+  }, [params]);
+
   const { request, responses, loading, error, refetch } = useRequestByToken(token);
 
   const handleCopyLink = async () => {
@@ -26,7 +33,8 @@ export default function RequestDetailPage({
     }
   };
 
-  if (loading) {
+  // Show loading if we don't have the token yet
+  if (!token || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

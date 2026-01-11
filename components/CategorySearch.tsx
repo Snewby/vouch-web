@@ -114,7 +114,10 @@ export function CategorySearch({
             <button
               key={option.id}
               type="button"
-              onClick={() => handleSelect(option)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleSelect(option);
+              }}
               className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
             >
               {option.parentName && (
