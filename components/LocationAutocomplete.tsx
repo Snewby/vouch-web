@@ -55,7 +55,7 @@ export function LocationAutocomplete({
 
   const handleInputBlur = () => {
     // Delay to allow click on dropdown item
-    setTimeout(() => setShowDropdown(false), 200);
+    setTimeout(() => setShowDropdown(false), 300);
   };
 
   const exactMatch = areas.find(
@@ -82,7 +82,10 @@ export function LocationAutocomplete({
             <button
               key={area.id}
               type="button"
-              onClick={() => handleSelect(area)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // Prevent input blur
+                handleSelect(area);
+              }}
               className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
             >
               <span className="font-medium">{area.name}</span>
