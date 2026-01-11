@@ -95,7 +95,7 @@ async function fetchAllCategoriesAndSubcategories(): Promise<CategoryOption[]> {
       flatList.push({
         id: sub.id,
         name: sub.name,
-        parentId: sub.parent_id,
+        parentId: sub.parent_id || null,
         parentName,
         displayName: parentName ? `${sub.name} (${parentName})` : sub.name,
         isSubcategory: true,
