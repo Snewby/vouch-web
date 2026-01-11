@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAllCategoriesFlat } from '@/lib/hooks/useAllCategoriesFlat';
-import { useCachedAreas } from '@/lib/hooks/useCachedAreas';
+import { useLocationHierarchy } from '@/lib/hooks/useLocationHierarchy';
 import { useCreateRequest } from '@/lib/hooks/useCreateRequest';
 import { useCreateArea } from '@/lib/hooks/useCreateArea';
 import { LocationAutocomplete } from './LocationAutocomplete';
@@ -16,7 +16,7 @@ import { CategorySearch } from './CategorySearch';
 export function CreateRequestForm() {
   const router = useRouter();
   const { categories, loading: categoriesLoading } = useAllCategoriesFlat();
-  const { areas, loading: areasLoading } = useCachedAreas();
+  const { areas, loading: areasLoading } = useLocationHierarchy();
   const { createRequestAsync, loading: creating, error } = useCreateRequest();
   const { getOrCreateAreaAsync } = useCreateArea();
 

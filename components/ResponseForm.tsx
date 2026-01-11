@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useCreateResponse } from '@/lib/hooks/useCreateResponse';
-import { useCachedAreas } from '@/lib/hooks/useCachedAreas';
+import { useLocationHierarchy } from '@/lib/hooks/useLocationHierarchy';
 import { useCreateArea } from '@/lib/hooks/useCreateArea';
 import { LocationAutocomplete } from './LocationAutocomplete';
 
@@ -17,7 +17,7 @@ interface ResponseFormProps {
 
 export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
   const { createResponseAsync, loading, error } = useCreateResponse();
-  const { areas, loading: areasLoading } = useCachedAreas();
+  const { areas, loading: areasLoading } = useLocationHierarchy();
   const { getOrCreateAreaAsync } = useCreateArea();
 
   const [formData, setFormData] = useState({
