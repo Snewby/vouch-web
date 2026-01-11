@@ -6,6 +6,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../supabase';
 import { HierarchyItem } from '@/types/database';
+import { CategoryOption } from './useAllCategoriesFlat';
 
 /**
  * Fetch hierarchy items by list name
@@ -55,12 +56,77 @@ async function fetchHierarchyItems(
 }
 
 /**
+ * Fetch all categories AND subcategories from both lists
+ * Returns in CategoryOption format for unified search experience
+ */
+async function fetchAllCategoriesAndSubcategories(): Promise<CategoryOption[]> {
+  try {
+    // Fetch categories
+    const categories = await fetchHierarchyItems('category');
+
+    // Fetch subcategories
+    const subcategories = await fetchHierarchyItems('subcategory');
+
+    // Create a map of category IDs to names
+    const categoryMap = new Map<string, string>();
+    categories.forEach((cat) => {
+      categoryMap.set(cat.id, cat.name);
+    });
+
+    // Build flat list with CategoryOption format
+    const flatList: CategoryOption[] = [];
+
+    // Add all categories
+    categories.forEach((cat) => {
+      flatList.push({
+        id: cat.id,
+        name: cat.name,
+        parentId: null,
+        parentName: null,
+        displayName: cat.name,
+        isSubcategory: false,
+        sortOrder: cat.sort_order || 999,
+      });
+    });
+
+    // Add all subcategories with parent context
+    subcategories.forEach((sub) => {
+      const parentName = sub.parent_id ? categoryMap.get(sub.parent_id) || null : null;
+      flatList.push({
+        id: sub.id,
+        name: sub.name,
+        parentId: sub.parent_id,
+        parentName,
+        displayName: parentName ? `${sub.name} (${parentName})` : sub.name,
+        isSubcategory: true,
+        sortOrder: sub.sort_order || 999,
+      });
+    });
+
+    // Sort by sort_order then by name
+    flatList.sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) {
+        return a.sortOrder - b.sortOrder;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    return flatList;
+  } catch (error: any) {
+    console.error('Error loading categories and subcategories:', error);
+    throw new Error(error.message || 'Failed to load categories');
+  }
+}
+
+/**
  * Cached categories hook - 24 hour cache since categories rarely change
+ * Fetches ALL categories and subcategories for hierarchical search
+ * Now returns CategoryOption[] format for consistency
  */
 export function useCachedCategories() {
   const query = useQuery({
     queryKey: ['categories'],
-    queryFn: () => fetchHierarchyItems('category', null),
+    queryFn: fetchAllCategoriesAndSubcategories,
     staleTime: 24 * 60 * 60 * 1000, // 24 hours
     gcTime: 24 * 60 * 60 * 1000, // 24 hours
   });

@@ -17,16 +17,9 @@ export function RequestCard({ request }: RequestCardProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer min-h-[44px]">
         {/* Category and Location Tags */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {request.business_type_name && (
-            <Badge variant="default">
-              {request.business_type_name}
-            </Badge>
-          )}
-          {request.subcategory_name && (
-            <Badge variant="secondary">
-              {request.subcategory_name}
-            </Badge>
-          )}
+          <Badge variant="default">
+            {request.subcategory_name || request.business_type_name || 'Recommendation'}
+          </Badge>
           {request.location_name && (
             <Badge variant="outline">
               📍 {request.location_name}

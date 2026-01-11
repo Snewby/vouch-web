@@ -75,13 +75,6 @@ export function ShareRequestButtons({
 
   return (
     <div className="space-y-3">
-      {/* URL Display */}
-      <div className="p-3 bg-muted rounded-lg">
-        <p className="text-sm font-mono text-muted-foreground break-all">
-          {url}
-        </p>
-      </div>
-
       {/* Share Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <Button

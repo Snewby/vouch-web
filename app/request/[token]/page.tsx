@@ -105,7 +105,7 @@ export default function RequestDetailPage({
         <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
           <div className="mb-4 flex flex-wrap gap-2">
             <Badge variant="default">
-              {request.business_type_name || 'Recommendation'}
+              {request.subcategory_name || request.business_type_name || 'Recommendation'}
             </Badge>
             {request.location_name && (
               <Badge variant="outline">
@@ -133,6 +133,16 @@ export default function RequestDetailPage({
           </div>
         </div>
 
+        {/* Existing Responses */}
+        {responses.length > 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              Recommendations ({responses.length})
+            </h2>
+            <ResponseList responses={responses} />
+          </div>
+        )}
+
         {/* Share Request Section */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -158,16 +168,6 @@ export default function RequestDetailPage({
           </h2>
           <ResponseForm requestId={request.id} onSuccess={refetch} />
         </div>
-
-        {/* Existing Responses */}
-        {responses.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Recommendations ({responses.length})
-            </h2>
-            <ResponseList responses={responses} />
-          </div>
-        )}
       </main>
     </div>
   );

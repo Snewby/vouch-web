@@ -23,7 +23,10 @@ async function fetchRequests(
     }
 
     if (filters?.businessType) {
-      query = query.eq('category_id', filters.businessType);
+      // Check both category_id and subcategory_id to support hierarchical filtering
+      query = query.or(
+        `category_id.eq.${filters.businessType},subcategory_id.eq.${filters.businessType}`
+      );
     }
 
     if (filters?.search) {

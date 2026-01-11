@@ -3,13 +3,14 @@
  */
 
 import { useState } from 'react';
+import type { CategoryOption } from '@/lib/hooks/useAllCategoriesFlat';
 import type { HierarchyItem } from '@/types/database';
 import type { RequestFilters as RequestFiltersType } from '@/types/request';
-import { SearchableSelect } from './SearchableSelect';
 import { LocationSearchableSelect } from './LocationSearchableSelect';
+import { CategorySearch } from './CategorySearch';
 
 interface RequestFiltersProps {
-  categories: HierarchyItem[];
+  categories: CategoryOption[];
   areas: HierarchyItem[];
   filters: RequestFiltersType;
   onFilterChange: (filters: RequestFiltersType) => void;
@@ -32,7 +33,8 @@ export function RequestFilters({
     onFilterChange({ ...filters, location: id || undefined });
   };
 
-  const handleBusinessTypeChange = (id: string) => {
+  const handleBusinessTypeChange = (id: string, categoryId: string, subcategoryId: string | null) => {
+    // For filtering, we just use the selected ID (could be category or subcategory)
     onFilterChange({ ...filters, businessType: id || undefined });
   };
 
@@ -84,12 +86,12 @@ export function RequestFilters({
 
         {/* Business Type Filter */}
         <div className="md:col-span-3">
-          <SearchableSelect
-            options={categories}
+          <CategorySearch
+            categories={categories}
             loading={false}
             value={filters.businessType || ''}
-            placeholder="All Types"
             onSelect={handleBusinessTypeChange}
+            placeholder="All Types"
           />
         </div>
 
