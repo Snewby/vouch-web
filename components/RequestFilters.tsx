@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import type { HierarchyItem } from '@/types/database';
 import type { RequestFilters as RequestFiltersType } from '@/types/request';
+import { SearchableSelect } from './SearchableSelect';
+import { LocationSearchableSelect } from './LocationSearchableSelect';
 
 interface RequestFiltersProps {
   categories: HierarchyItem[];
@@ -26,12 +28,12 @@ export function RequestFilters({
     onFilterChange({ ...filters, search: searchInput || undefined });
   };
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFilterChange({ ...filters, location: e.target.value || undefined });
+  const handleLocationChange = (id: string) => {
+    onFilterChange({ ...filters, location: id || undefined });
   };
 
-  const handleBusinessTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFilterChange({ ...filters, businessType: e.target.value || undefined });
+  const handleBusinessTypeChange = (id: string) => {
+    onFilterChange({ ...filters, businessType: id || undefined });
   };
 
   const handleClearFilters = () => {
@@ -71,34 +73,24 @@ export function RequestFilters({
 
         {/* Location Filter */}
         <div className="md:col-span-3">
-          <select
+          <LocationSearchableSelect
+            options={areas}
+            loading={false}
             value={filters.location || ''}
-            onChange={handleLocationChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          >
-            <option value="">All Locations</option>
-            {areas.map((area) => (
-              <option key={area.id} value={area.id}>
-                {area.name}
-              </option>
-            ))}
-          </select>
+            placeholder="All Locations"
+            onSelect={handleLocationChange}
+          />
         </div>
 
         {/* Business Type Filter */}
         <div className="md:col-span-3">
-          <select
+          <SearchableSelect
+            options={categories}
+            loading={false}
             value={filters.businessType || ''}
-            onChange={handleBusinessTypeChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          >
-            <option value="">All Types</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            placeholder="All Types"
+            onSelect={handleBusinessTypeChange}
+          />
         </div>
 
         {/* Clear Filters Button */}
