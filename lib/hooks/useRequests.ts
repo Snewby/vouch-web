@@ -10,13 +10,16 @@ import { RequestFilters } from '@/types/request';
 /**
  * Fetch all public requests from web_request_feed view
  */
-async function fetchRequests(filters?: RequestFilters): Promise<WebRequestFeed[]> {
+async function fetchRequests(
+  filters?: RequestFilters,
+  locationIds?: string[]
+): Promise<WebRequestFeed[]> {
   try {
     let query = supabase.from('web_request_feed').select('*');
 
-    // Apply filters
-    if (filters?.location) {
-      query = query.eq('area_id', filters.location);
+    // Apply location filter (hierarchical - includes descendants)
+    if (locationIds && locationIds.length > 0) {
+      query = query.in('area_id', locationIds);
     }
 
     if (filters?.businessType) {
@@ -49,11 +52,12 @@ async function fetchRequests(filters?: RequestFilters): Promise<WebRequestFeed[]
 
 /**
  * Hook to fetch all requests with optional filters
+ * Accepts locationIds for hierarchical filtering (includes parent + all descendants)
  */
-export function useRequests(filters?: RequestFilters) {
+export function useRequests(filters?: RequestFilters, locationIds?: string[]) {
   const query = useQuery({
-    queryKey: ['requests', filters],
-    queryFn: () => fetchRequests(filters),
+    queryKey: ['requests', filters, locationIds],
+    queryFn: () => fetchRequests(filters, locationIds),
     staleTime: 2 * 60 * 1000, // 2 minutes - requests are dynamic
     gcTime: 5 * 60 * 1000, // 5 minutes
   });

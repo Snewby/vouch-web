@@ -128,6 +128,7 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
           onSelect={handleLocationSelect}
           onChange={(value) => setFormData({ ...formData, location: value, locationId: '' })}
           required={false}
+          showParentContext={true}
         />
       </div>
 

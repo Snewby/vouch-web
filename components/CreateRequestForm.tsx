@@ -112,6 +112,7 @@ export function CreateRequestForm() {
           value={formData.location}
           onSelect={handleLocationSelect}
           onChange={(value) => setFormData({ ...formData, location: value, locationId: '' })}
+          showParentContext={true}
         />
       </div>
 

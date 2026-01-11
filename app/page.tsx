@@ -8,16 +8,22 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRequests } from '@/lib/hooks/useRequests';
 import { useCachedCategories } from '@/lib/hooks/useCachedCategories';
-import { useCachedAreas } from '@/lib/hooks/useCachedAreas';
+import { useLocationHierarchy } from '@/lib/hooks/useLocationHierarchy';
 import { RequestCard } from '@/components/RequestCard';
 import { RequestFilters } from '@/components/RequestFilters';
 import type { RequestFilters as RequestFiltersType } from '@/types/request';
 
 export default function HomePage() {
   const [filters, setFilters] = useState<RequestFiltersType>({});
-  const { requests, loading, error } = useRequests(filters);
   const { categories } = useCachedCategories();
-  const { areas } = useCachedAreas();
+  const { areas, getLocationWithDescendants } = useLocationHierarchy();
+
+  // Expand location filter to include all descendants (boroughs + neighbourhoods)
+  const locationIds = filters.location
+    ? getLocationWithDescendants(filters.location)
+    : undefined;
+
+  const { requests, loading, error } = useRequests(filters, locationIds);
 
   return (
     <div className="min-h-screen bg-gray-50">

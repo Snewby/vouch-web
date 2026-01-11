@@ -14,6 +14,7 @@ interface LocationAutocompleteProps {
   onSelect: (areaId: string, areaName: string) => void;
   onChange: (value: string) => void;
   required?: boolean;
+  showParentContext?: boolean; // Show parent in dropdown like "Westminster (London)"
 }
 
 export function LocationAutocomplete({
@@ -23,9 +24,21 @@ export function LocationAutocomplete({
   onSelect,
   onChange,
   required = true,
+  showParentContext = false,
 }: LocationAutocompleteProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredAreas, setFilteredAreas] = useState<HierarchyItem[]>([]);
+
+  // Build parent lookup map for displaying context
+  const parentMap = new Map<string, string>();
+  areas.forEach((area) => {
+    if (area.parent_id) {
+      const parent = areas.find((a) => a.id === area.parent_id);
+      if (parent) {
+        parentMap.set(area.id, parent.name);
+      }
+    }
+  });
 
   useEffect(() => {
     if (value.trim()) {
@@ -80,22 +93,28 @@ export function LocationAutocomplete({
 
       {showDropdown && filteredAreas.length > 0 && (
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-          {filteredAreas.slice(0, 10).map((area) => (
-            <button
-              key={area.id}
-              type="button"
-              onMouseDown={(e) => {
-                e.preventDefault(); // Prevent input blur
-                handleSelect(area);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
-            >
-              <span className="font-medium">{area.name}</span>
-              {area.metadata?.user_generated && (
-                <span className="ml-2 text-xs text-gray-500">(user-added)</span>
-              )}
-            </button>
-          ))}
+          {filteredAreas.slice(0, 10).map((area) => {
+            const parentName = showParentContext ? parentMap.get(area.id) : null;
+            return (
+              <button
+                key={area.id}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault(); // Prevent input blur
+                  handleSelect(area);
+                }}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+              >
+                <span className="font-medium">{area.name}</span>
+                {parentName && (
+                  <span className="ml-2 text-sm text-gray-500">({parentName})</span>
+                )}
+                {area.metadata?.user_generated && (
+                  <span className="ml-2 text-xs text-gray-500">(user-added)</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
