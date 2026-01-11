@@ -43,9 +43,36 @@ export function LocationSearchableSelect({
 
   useEffect(() => {
     if (searchValue.trim()) {
-      const filtered = options.filter((option) =>
-        option.name.toLowerCase().includes(searchValue.toLowerCase())
-      );
+      const searchLower = searchValue.toLowerCase();
+      const filtered = options
+        .filter((option) =>
+          option.name.toLowerCase().includes(searchLower)
+        )
+        .sort((a, b) => {
+          const aName = a.name.toLowerCase();
+          const bName = b.name.toLowerCase();
+
+          // Exact match comes first
+          const aExact = aName === searchLower;
+          const bExact = bName === searchLower;
+          if (aExact && !bExact) return -1;
+          if (!aExact && bExact) return 1;
+
+          // Starts with search term comes before contains
+          const aStarts = aName.startsWith(searchLower);
+          const bStarts = bName.startsWith(searchLower);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+
+          // Top-level (no parent) comes before children
+          const aTopLevel = !a.parent_id;
+          const bTopLevel = !b.parent_id;
+          if (aTopLevel && !bTopLevel) return -1;
+          if (!aTopLevel && bTopLevel) return 1;
+
+          // Alphabetical
+          return aName.localeCompare(bName);
+        });
       setFilteredOptions(filtered);
       setShowDropdown(true);
     } else {
