@@ -4,7 +4,6 @@
 
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
 import { useRequestByToken } from '@/lib/hooks/useRequestByToken';
 import { ResponseForm } from '@/components/ResponseForm';
@@ -14,10 +13,9 @@ import { formatRelativeDate, getRequestShareUrl, copyToClipboard } from '@/lib/u
 export default function RequestDetailPage({
   params,
 }: {
-  params: Promise<{ token: string }>;
+  params: { token: string };
 }) {
-  const resolvedParams = use(params);
-  const { token } = resolvedParams;
+  const { token } = params;
   const { request, responses, loading, error, refetch } = useRequestByToken(token);
 
   const handleCopyLink = async () => {

@@ -13,6 +13,7 @@ interface LocationAutocompleteProps {
   value: string;
   onSelect: (areaId: string, areaName: string) => void;
   onChange: (value: string) => void;
+  required?: boolean;
 }
 
 export function LocationAutocomplete({
@@ -21,6 +22,7 @@ export function LocationAutocomplete({
   value,
   onSelect,
   onChange,
+  required = true,
 }: LocationAutocompleteProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredAreas, setFilteredAreas] = useState<HierarchyItem[]>([]);
@@ -66,7 +68,7 @@ export function LocationAutocomplete({
     <div className="relative">
       <input
         type="text"
-        required
+        required={required}
         placeholder="Start typing location..."
         value={value}
         onChange={handleInputChange}

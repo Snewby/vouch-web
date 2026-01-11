@@ -6,6 +6,9 @@
 
 import { useState } from 'react';
 import { useCreateResponse } from '@/lib/hooks/useCreateResponse';
+import { useCachedAreas } from '@/lib/hooks/useCachedAreas';
+import { useCreateArea } from '@/lib/hooks/useCreateArea';
+import { LocationAutocomplete } from './LocationAutocomplete';
 
 interface ResponseFormProps {
   requestId: string;
@@ -14,6 +17,9 @@ interface ResponseFormProps {
 
 export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
   const { createResponseAsync, loading, error } = useCreateResponse();
+  const { areas, loading: areasLoading } = useCachedAreas();
+  const { getOrCreateAreaAsync } = useCreateArea();
+
   const [formData, setFormData] = useState({
     responderName: '',
     businessName: '',
@@ -21,13 +27,25 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
     instagram: '',
     website: '',
     location: '',
+    locationId: '',
     notes: '',
   });
+
+  const handleLocationSelect = (areaId: string, areaName: string) => {
+    setFormData({ ...formData, locationId: areaId, location: areaName });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
+      // Get or create area ID if location is provided
+      let locationToSave = formData.location;
+      if (formData.location && !formData.locationId) {
+        // User typed a new location, create it
+        await getOrCreateAreaAsync(formData.location);
+      }
+
       await createResponseAsync({
         request_id: requestId,
         responder_name: formData.responderName || null,
@@ -35,7 +53,7 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
         email: formData.email || null,
         instagram: formData.instagram || null,
         website: formData.website || null,
-        location: formData.location || null,
+        location: locationToSave || null,
         notes: formData.notes || null,
         is_guest: true,
       });
@@ -48,6 +66,7 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
         instagram: '',
         website: '',
         location: '',
+        locationId: '',
         notes: '',
       });
 
@@ -102,13 +121,13 @@ export function ResponseForm({ requestId, onSuccess }: ResponseFormProps) {
         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
           Location (optional)
         </label>
-        <input
-          id="location"
-          type="text"
-          placeholder="e.g., Hackney, London"
+        <LocationAutocomplete
+          areas={areas}
+          loading={areasLoading}
           value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          onSelect={handleLocationSelect}
+          onChange={(value) => setFormData({ ...formData, location: value, locationId: '' })}
+          required={false}
         />
       </div>
 
