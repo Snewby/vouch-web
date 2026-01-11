@@ -105,10 +105,10 @@ export function LocationAutocomplete({
                 }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
               >
-                <span className="font-medium">{area.name}</span>
                 {parentName && (
-                  <span className="ml-2 text-sm text-gray-500">({parentName})</span>
+                  <span className="text-sm text-gray-500">({parentName}) </span>
                 )}
+                <span className="font-semibold text-gray-900">{area.name}</span>
                 {area.metadata?.user_generated && (
                   <span className="ml-2 text-xs text-gray-500">(user-added)</span>
                 )}

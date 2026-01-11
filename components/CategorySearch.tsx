@@ -115,9 +115,10 @@ export function CategorySearch({
               onClick={() => handleSelect(option)}
               className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
             >
-              <span className={option.isSubcategory ? 'font-normal' : 'font-medium'}>
-                {option.displayName}
-              </span>
+              {option.parentName && (
+                <span className="text-sm text-gray-500">({option.parentName}) </span>
+              )}
+              <span className="font-semibold text-gray-900">{option.name}</span>
             </button>
           ))}
         </div>
