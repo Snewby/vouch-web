@@ -15,6 +15,7 @@ import { CategorySearch } from './CategorySearch';
 import { Alert, AlertDescription } from './ui/alert';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
+import { addMyRequest } from '@/lib/localStorage';
 
 export function CreateRequestForm() {
   const router = useRouter();
@@ -75,6 +76,9 @@ export function CreateRequestForm() {
         subcategory_id: formData.subcategoryId || null,
         area_id: areaId,
       });
+
+      // Save to localStorage for "Your Requests" feature
+      addMyRequest(request.share_token);
 
       // Redirect to request detail page with success indicator
       router.push(`/request/${request.share_token}?new=1`);

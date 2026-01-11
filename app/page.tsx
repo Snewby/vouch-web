@@ -11,6 +11,7 @@ import { useCachedCategories } from '@/lib/hooks/useCachedCategories';
 import { useLocationHierarchy } from '@/lib/hooks/useLocationHierarchy';
 import { RequestCard } from '@/components/RequestCard';
 import { RequestFilters } from '@/components/RequestFilters';
+import { MyRequests } from '@/components/MyRequests';
 import type { RequestFilters as RequestFiltersType } from '@/types/request';
 
 export default function HomePage() {
@@ -44,6 +45,9 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* My Requests (if any) */}
+        <MyRequests />
+
         {/* Filters */}
         <RequestFilters
           categories={categories}
