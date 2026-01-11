@@ -13,43 +13,46 @@ export interface LocationHierarchy {
 }
 
 /**
- * Fetch all areas and build hierarchy map
+ * Fetch all locations from city, area, and neighbourhood lists
+ * Builds complete 3-level hierarchy: city > area (borough) > neighbourhood
  */
 async function fetchLocationHierarchy(): Promise<LocationHierarchy> {
   try {
-    // Get area list ID
-    const { data: list, error: listError } = await supabase
+    // Get all three list IDs
+    const { data: lists, error: listsError } = await supabase
       .from('lists')
-      .select('id')
-      .eq('name', 'area')
-      .single();
+      .select('id, name')
+      .in('name', ['city', 'area', 'neighbourhood']);
 
-    if (listError || !list) {
-      throw new Error('Area list not found');
+    if (listsError) throw listsError;
+    if (!lists || lists.length === 0) {
+      throw new Error('Location lists not found');
     }
 
-    // Fetch all areas
-    const { data: areas, error: areasError } = await supabase
+    const listIds = lists.map(l => l.id);
+
+    // Fetch all items from city, area, and neighbourhood lists
+    const { data: allLocations, error: locationsError } = await supabase
       .from('list_items')
       .select('id, name, code_name, parent_id, list_id, metadata, sort_order')
-      .eq('list_id', list.id)
+      .in('list_id', listIds)
       .order('sort_order', { ascending: true })
       .order('name', { ascending: true });
 
-    if (areasError) throw areasError;
+    if (locationsError) throw locationsError;
 
-    // Build descendants map
+    // Build descendants map across all 3 levels
     const descendantsMap = new Map<string, string[]>();
 
     // First pass: collect immediate children
-    (areas || []).forEach((area) => {
-      if (area.parent_id) {
-        const existing = descendantsMap.get(area.parent_id) || [];
-        descendantsMap.set(area.parent_id, [...existing, area.id]);
+    (allLocations || []).forEach((location) => {
+      if (location.parent_id) {
+        const existing = descendantsMap.get(location.parent_id) || [];
+        descendantsMap.set(location.parent_id, [...existing, location.id]);
       }
     });
 
-    // Second pass: recursively collect all descendants
+    // Second pass: recursively collect all descendants (across all levels)
     const getAllDescendants = (parentId: string): string[] => {
       const immediateChildren = descendantsMap.get(parentId) || [];
       const allDescendants = [...immediateChildren];
@@ -62,17 +65,17 @@ async function fetchLocationHierarchy(): Promise<LocationHierarchy> {
       return allDescendants;
     };
 
-    // Build complete descendants map (includes all nested children)
+    // Build complete descendants map (includes all nested children across all levels)
     const completeDescendantsMap = new Map<string, string[]>();
-    (areas || []).forEach((area) => {
-      const descendants = getAllDescendants(area.id);
+    (allLocations || []).forEach((location) => {
+      const descendants = getAllDescendants(location.id);
       if (descendants.length > 0) {
-        completeDescendantsMap.set(area.id, descendants);
+        completeDescendantsMap.set(location.id, descendants);
       }
     });
 
     return {
-      areas: areas || [],
+      areas: allLocations || [],
       descendantsMap: completeDescendantsMap,
     };
   } catch (error: any) {
