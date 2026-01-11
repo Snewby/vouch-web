@@ -12,11 +12,17 @@ import { RecResponse } from '@/types/database';
  */
 async function createResponse(input: CreateResponseInput): Promise<RecResponse> {
   try {
+    // For guest responses, use email or generate a placeholder
+    const guestEmail = input.is_guest
+      ? (input.email || `guest_${Date.now()}@vouch.temp`)
+      : null;
+
     const { data, error } = await supabase
       .from('rec_responses')
       .insert({
         request_id: input.request_id,
         is_guest: input.is_guest,
+        guest_email: guestEmail,
         responder_name: input.responder_name || null,
         business_name: input.business_name,
         email: input.email || null,
