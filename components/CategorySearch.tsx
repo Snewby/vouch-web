@@ -31,8 +31,10 @@ export function CategorySearch({
 
   useEffect(() => {
     if (searchValue.trim()) {
+      const searchLower = searchValue.toLowerCase();
       const filtered = categories.filter((cat) =>
-        cat.displayName.toLowerCase().includes(searchValue.toLowerCase())
+        cat.name.toLowerCase().includes(searchLower) ||
+        (cat.parentName && cat.parentName.toLowerCase().includes(searchLower))
       );
       setFilteredCategories(filtered);
       setShowDropdown(true);
