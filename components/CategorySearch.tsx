@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { CategoryOption } from '@/lib/hooks/useAllCategoriesFlat';
 
 interface CategorySearchProps {
@@ -33,6 +33,7 @@ export function CategorySearch({
   const [searchValue, setSearchValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredCategories, setFilteredCategories] = useState<CategoryOption[]>([]);
+  const lastNotifiedValue = useRef<string>('');
 
   // Find selected option
   const selectedOption = categories.find((cat) => cat.id === value);
@@ -60,7 +61,7 @@ export function CategorySearch({
     }
   }, [searchValue, categories]);
 
-  // Notify parent when creating new business type (separate effect to avoid infinite loops)
+  // Notify parent when creating new business type (only when value changes)
   useEffect(() => {
     if (searchValue.trim()) {
       const searchLower = searchValue.toLowerCase();
@@ -73,8 +74,21 @@ export function CategorySearch({
       );
 
       if (!exactMatch && !hasResults) {
-        // Notify parent that user is typing a new business type
-        onSelect('', '', null, true, searchValue.trim());
+        // Only notify if the value actually changed
+        if (lastNotifiedValue.current !== searchValue.trim()) {
+          lastNotifiedValue.current = searchValue.trim();
+          onSelect('', '', null, true, searchValue.trim());
+        }
+      } else {
+        // Reset if we're no longer creating new
+        if (lastNotifiedValue.current) {
+          lastNotifiedValue.current = '';
+        }
+      }
+    } else {
+      // Reset when search is cleared
+      if (lastNotifiedValue.current) {
+        lastNotifiedValue.current = '';
       }
     }
   }, [searchValue, categories, onSelect]);
