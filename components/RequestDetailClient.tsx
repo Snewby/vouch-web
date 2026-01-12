@@ -124,7 +124,7 @@ export function RequestDetailClient({
           <ShareRequestButtons
             requestToken={request.share_token}
             requestTitle={request.title}
-            subcategory={request.subcategory_name || undefined}
+            subcategory={request.subcategory_name || request.business_type_name || undefined}
             location={request.location_name || undefined}
           />
         </div>
