@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# comparison documents (internal use only)
+/docs/WHY-VOUCH-MVP-WINS.md
+/docs/VOUCH-WEB-WINS-REANALYSIS.md
+/docs/COMPARISON-SUMMARY.md
+/docs/CODEBASE-COMPARISON.md
+/docs/PRODUCTION-READINESS-REALITY-CHECK.md
+/COMPREHENSIVE-COMPARISON.md
+/IMPLEMENTATION-PLAN.md
