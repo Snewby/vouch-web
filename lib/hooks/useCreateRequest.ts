@@ -11,7 +11,7 @@ import { RecRequest } from '@/types/database';
  * Generate title from category/subcategory and area
  */
 async function generateTitle(
-  categoryId: string,
+  categoryId: string | null,
   subcategoryId: string | null,
   areaId: string
 ): Promise<string> {
@@ -41,7 +41,7 @@ async function generateTitle(
       }
     }
 
-    if (!businessTypeName) {
+    if (!businessTypeName && categoryId) {
       const { data: catItem, error: catError } = await supabase
         .from('list_items')
         .select('name')
@@ -54,7 +54,7 @@ async function generateTitle(
     }
 
     // Generate title: "Restaurant in Shoreditch" or "Food & Drink in Hackney"
-    return `${businessTypeName} in ${areaName}`;
+    return businessTypeName ? `${businessTypeName} in ${areaName}` : `Recommendation in ${areaName}`;
   } catch (error) {
     console.error('Error generating title:', error);
     return 'Recommendation Request';

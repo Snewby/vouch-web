@@ -33,9 +33,18 @@ export function RequestFilters({
     onFilterChange({ ...filters, location: id || undefined });
   };
 
-  const handleBusinessTypeChange = (id: string, categoryId: string, subcategoryId: string | null) => {
+  const handleBusinessTypeChange = (
+    id: string,
+    categoryId: string,
+    subcategoryId: string | null,
+    isNew: boolean,
+    newName?: string
+  ) => {
     // For filtering, we just use the selected ID (could be category or subcategory)
-    onFilterChange({ ...filters, businessType: id || undefined });
+    // Ignore new business types in filtering (they can only be used in request creation)
+    if (!isNew) {
+      onFilterChange({ ...filters, businessType: id || undefined });
+    }
   };
 
   const handleClearFilters = () => {

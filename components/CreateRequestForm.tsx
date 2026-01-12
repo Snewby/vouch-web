@@ -10,6 +10,7 @@ import { useAllCategoriesFlat } from '@/lib/hooks/useAllCategoriesFlat';
 import { useLocationHierarchy } from '@/lib/hooks/useLocationHierarchy';
 import { useCreateRequest } from '@/lib/hooks/useCreateRequest';
 import { useCreateArea } from '@/lib/hooks/useCreateArea';
+import { useCreateSubcategory } from '@/lib/hooks/useCreateSubcategory';
 import { LocationAutocomplete } from './LocationAutocomplete';
 import { CategorySearch } from './CategorySearch';
 import { Alert, AlertDescription } from './ui/alert';
@@ -23,6 +24,7 @@ export function CreateRequestForm() {
   const { areas, loading: areasLoading } = useLocationHierarchy();
   const { createRequestAsync, loading: creating, error } = useCreateRequest();
   const { getOrCreateAreaAsync } = useCreateArea();
+  const { getOrCreateSubcategoryAsync } = useCreateSubcategory();
 
   const [formData, setFormData] = useState({
     location: '',
@@ -31,6 +33,8 @@ export function CreateRequestForm() {
     subcategoryId: '',
     selectedCategoryOptionId: '', // The actual selected option ID (could be category or subcategory)
     context: '',
+    isNewBusinessType: false,
+    newBusinessTypeName: '',
   });
 
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -42,13 +46,17 @@ export function CreateRequestForm() {
   const handleCategorySelect = (
     optionId: string,
     categoryId: string,
-    subcategoryId: string | null
+    subcategoryId: string | null,
+    isNew: boolean,
+    newName?: string
   ) => {
     setFormData({
       ...formData,
       selectedCategoryOptionId: optionId,
       categoryId,
       subcategoryId: subcategoryId || '',
+      isNewBusinessType: isNew,
+      newBusinessTypeName: newName || '',
     });
   };
 
@@ -68,12 +76,22 @@ export function CreateRequestForm() {
         return;
       }
 
+      // Handle new business type creation
+      let subcategoryId = formData.subcategoryId;
+      let categoryId = formData.categoryId;
+
+      if (formData.isNewBusinessType && formData.newBusinessTypeName) {
+        // Create new subcategory (no parent category needed)
+        subcategoryId = await getOrCreateSubcategoryAsync(formData.newBusinessTypeName);
+        categoryId = ''; // No parent category for user-generated
+      }
+
       // Create request
       const request = await createRequestAsync({
         title: '', // Will be auto-generated on backend
         context: formData.context || null,
-        category_id: formData.categoryId,
-        subcategory_id: formData.subcategoryId || null,
+        category_id: categoryId || null,
+        subcategory_id: subcategoryId || null,
         area_id: areaId,
       });
 
@@ -90,7 +108,7 @@ export function CreateRequestForm() {
 
   const isFormValid =
     (formData.locationId || formData.location.trim()) &&
-    formData.categoryId;
+    (formData.categoryId || formData.isNewBusinessType);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">

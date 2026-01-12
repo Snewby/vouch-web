@@ -3,7 +3,7 @@ import { HierarchyItem } from './database';
 export interface CreateRequestInput {
   title: string;
   context?: string | null;
-  category_id: string;
+  category_id: string | null;
   subcategory_id?: string | null;
   area_id: string;
   neighbourhood_id?: string | null;

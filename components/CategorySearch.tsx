@@ -11,7 +11,13 @@ interface CategorySearchProps {
   categories: CategoryOption[];
   loading: boolean;
   value: string; // category or subcategory ID
-  onSelect: (id: string, categoryId: string, subcategoryId: string | null) => void;
+  onSelect: (
+    id: string,
+    categoryId: string,
+    subcategoryId: string | null,
+    isNew: boolean,
+    newName?: string
+  ) => void;
   required?: boolean;
   placeholder?: string;
 }
@@ -40,6 +46,16 @@ export function CategorySearch({
       );
       setFilteredCategories(filtered);
       setShowDropdown(true);
+
+      // Check if this is a new business type (no exact match and no results)
+      const exactMatch = categories.find(
+        (cat) => cat.name.toLowerCase() === searchLower
+      );
+
+      if (!exactMatch && filtered.length === 0) {
+        // Notify parent that user is typing a new business type
+        onSelect('', '', null, true, searchValue.trim());
+      }
     } else {
       setFilteredCategories(categories);
       setShowDropdown(false);
@@ -56,10 +72,15 @@ export function CategorySearch({
     const categoryId = option.isSubcategory ? option.parentId! : option.id;
     const subcategoryId = option.isSubcategory ? option.id : null;
 
-    onSelect(option.id, categoryId, subcategoryId);
+    onSelect(option.id, categoryId, subcategoryId, false);
     setSearchValue('');
     setShowDropdown(false);
   };
+
+  // Check if there's an exact match
+  const exactMatch = categories.find(
+    (cat) => cat.name.toLowerCase() === searchValue.toLowerCase()
+  );
 
   const handleInputFocus = () => {
     if (categories.length > 0) {
@@ -77,7 +98,7 @@ export function CategorySearch({
   };
 
   const handleClear = () => {
-    onSelect('', '', null);
+    onSelect('', '', null, false);
     setSearchValue('');
   };
 
@@ -131,10 +152,12 @@ export function CategorySearch({
         </div>
       )}
 
-      {/* No results message */}
-      {showDropdown && searchValue.trim() && filteredCategories.length === 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg px-4 py-3 text-gray-500 text-sm">
-          No matches found
+      {/* Create new business type indicator */}
+      {searchValue.trim() && !exactMatch && filteredCategories.length === 0 && (
+        <div className="mt-2 text-sm text-gray-600">
+          <span className="inline-block bg-green-50 border border-green-200 rounded px-3 py-1">
+            ✓ "{searchValue}" will be added as a new business type
+          </span>
         </div>
       )}
     </div>
