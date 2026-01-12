@@ -6,7 +6,18 @@
       "Bash(git commit:*)",
       "Bash(git branch:*)",
       "Bash(git remote add:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git clone:*)",
+      "Read(//c/Users/seand/vouch-mvp-compare/**)",
+      "Bash(npm install:*)",
+      "Bash(npx:*)",
+      "Bash(npm run build:*)",
+      "Bash(git log:*)",
+      "Read(//c/Users/seand/vouch-mvp/**)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": [],
     "ask": []

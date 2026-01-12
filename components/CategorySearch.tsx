@@ -37,6 +37,14 @@ export function CategorySearch({
   // Find selected option
   const selectedOption = categories.find((cat) => cat.id === value);
 
+  // Check if current search would create a new business type
+  const isCreatingNew = searchValue.trim() && !categories.find(
+    (cat) => cat.name.toLowerCase() === searchValue.toLowerCase()
+  ) && !categories.some((cat) =>
+    cat.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+    (cat.parentName && cat.parentName.toLowerCase().includes(searchValue.toLowerCase()))
+  );
+
   useEffect(() => {
     if (searchValue.trim()) {
       const searchLower = searchValue.toLowerCase();
@@ -46,21 +54,30 @@ export function CategorySearch({
       );
       setFilteredCategories(filtered);
       setShowDropdown(true);
-
-      // Check if this is a new business type (no exact match and no results)
-      const exactMatch = categories.find(
-        (cat) => cat.name.toLowerCase() === searchLower
-      );
-
-      if (!exactMatch && filtered.length === 0) {
-        // Notify parent that user is typing a new business type
-        onSelect('', '', null, true, searchValue.trim());
-      }
     } else {
       setFilteredCategories(categories);
       setShowDropdown(false);
     }
   }, [searchValue, categories]);
+
+  // Notify parent when creating new business type (separate effect to avoid infinite loops)
+  useEffect(() => {
+    if (searchValue.trim()) {
+      const searchLower = searchValue.toLowerCase();
+      const exactMatch = categories.find(
+        (cat) => cat.name.toLowerCase() === searchLower
+      );
+      const hasResults = categories.some((cat) =>
+        cat.name.toLowerCase().includes(searchLower) ||
+        (cat.parentName && cat.parentName.toLowerCase().includes(searchLower))
+      );
+
+      if (!exactMatch && !hasResults) {
+        // Notify parent that user is typing a new business type
+        onSelect('', '', null, true, searchValue.trim());
+      }
+    }
+  }, [searchValue, categories, onSelect]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -90,10 +107,11 @@ export function CategorySearch({
   };
 
   const handleInputBlur = () => {
-    // Delay to allow click on dropdown item
+    // Delay to allow click on dropdown item or form submit button
     setTimeout(() => {
       setShowDropdown(false);
-      setSearchValue('');
+      // Don't clear search value - let the form handle it
+      // This allows "Create Request" button click to work with new business types
     }, 200);
   };
 

@@ -64,6 +64,12 @@ export function CreateRequestForm() {
     e.preventDefault();
     setValidationError(null);
 
+    console.log('Form submit:', {
+      isNewBusinessType: formData.isNewBusinessType,
+      newBusinessTypeName: formData.newBusinessTypeName,
+      categoryId: formData.categoryId,
+    });
+
     try {
       // Get or create area ID
       let areaId = formData.locationId;
@@ -97,6 +103,18 @@ export function CreateRequestForm() {
 
       // Save to localStorage for "Your Requests" feature
       addMyRequest(request.share_token);
+
+      // Reset form state
+      setFormData({
+        location: '',
+        locationId: '',
+        categoryId: '',
+        subcategoryId: '',
+        selectedCategoryOptionId: '',
+        context: '',
+        isNewBusinessType: false,
+        newBusinessTypeName: '',
+      });
 
       // Redirect to request detail page with success indicator
       router.push(`/request/${request.share_token}?new=1`);
