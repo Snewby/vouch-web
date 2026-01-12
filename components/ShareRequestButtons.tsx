@@ -12,14 +12,14 @@ import { Copy, MessageCircle, Mail } from 'lucide-react';
 interface ShareRequestButtonsProps {
   requestToken: string;
   requestTitle: string;
-  businessType?: string;
+  subcategory?: string;
   location?: string;
 }
 
 export function ShareRequestButtons({
   requestToken,
   requestTitle,
-  businessType,
+  subcategory,
   location,
 }: ShareRequestButtonsProps) {
   const [copied, setCopied] = useState(false);
@@ -30,8 +30,8 @@ export function ShareRequestButtons({
 
   // Create share message
   const getMessage = () => {
-    if (businessType && location) {
-      return `Can anyone recommend a ${businessType} in ${location}? Add your recommendation here: ${url}`;
+    if (subcategory && location) {
+      return `Can anyone recommend a ${subcategory} in ${location}? Add your recommendation here: ${url}`;
     }
     return `${requestTitle}\n\nAdd your recommendation here: ${url}`;
   };
