@@ -17,7 +17,8 @@
       "Bash(npm run build:*)",
       "Bash(git log:*)",
       "Read(//c/Users/seand/vouch-mvp/**)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Read(//c/Users/seand/**)"
     ],
     "deny": [],
     "ask": []
